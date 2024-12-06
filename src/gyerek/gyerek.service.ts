@@ -17,67 +17,66 @@ export class GyerekService {
   findOne(id: number) {
     return this.db.gyerek.findUnique({where: {id: id}});
   }
-  async addToyToChild(childId: number, toyId: number): Promise<any> {
-    const child = await this.db.gyerek.findUnique({
-      where: { id: childId },
-      include: { jatekok: true },
-    });
-   
-    if (!child) {
-      throw new NotFoundException(`Child with ID ${childId} not found.`);
-    }
-   
-    if (!child.jovolte) {
-      throw new Error(`Child ID ${childId} is marked as "not good" and cannot receive toys.`);
-    }
-   
-    if (child.jatekok.length > 0) {
-      throw new Error(`Child ID ${childId} already has a toy assigned.`);
-    }
-   
-    const toy = await this.db.jatek.findUnique({
-      where: { id: toyId },
-    });
-   
-    if (!toy) {
-      throw new NotFoundException(`Toy with ID ${toyId} not found.`);
-    }
-   
-    return this.db.gyerek.update({
-      where: { id: childId },
-      data: {
-        jatekok: {
-          connect: { id: toyId },
+  async addToyToChild(gyerekId: number, jatekId: number) {
+    try {
+      const gyerek = await this.db.gyerek.findUnique({
+        where: { id: gyerekId },
+        include: { jatekok: true },
+      });
+  
+      const jatek = await this.db.jatek.findUnique({
+        where: { id: jatekId },
+      });
+  
+      if (!gyerek || !jatek) {
+        return null;
+      }
+  
+      await this.db.gyerek.update({
+        where: { id: gyerekId },
+        data: {
+          jatekok: {
+            connect: { id: jatekId },
+          },
         },
-      },
-    });
+      });
+  
+      return true;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
   
+  async removeToyFromChild(gyerekId: number, jatekId: number) {
+    try {
+      const gyerek = await this.db.gyerek.findUnique({
+        where: { id: gyerekId },
+        include: { jatekok: true },
+      });
   
-  async removeToyFromChild(childId: number, toyId: number): Promise<any> {
-    const child = await this.db.gyerek.findUnique({
-      where: { id: childId },
-      include: { jatekok: true },
-    });
-   
-    if (!child) {
-      throw new NotFoundException(`Child with ID ${childId} not found.`);
-    }
-   
-    const toy = child.jatekok.find((j) => j.id === toyId);
-   
-    if (!toy) {
-      throw new NotFoundException(`Toy with ID ${toyId} not assigned to child ID ${childId}.`);
-    }
-   
-    return this.db.gyerek.update({
-      where: { id: childId },
-      data: {
-        jatekok: {
-          disconnect: { id: toyId },
+      const jatek = await this.db.jatek.findUnique({
+        where: { id: jatekId },
+      });
+  
+      if (!gyerek || !jatek) {
+        return null;
+      }
+  
+      await this.db.gyerek.update({
+        where: { id: gyerekId },
+        data: {
+          jatekok: {
+            disconnect: { id: jatekId },
+          },
         },
-      },
-    });
+      });
+  
+      return true;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
   async update(id: number, updateGyerekDto: UpdateGyerekDto) {
     try{

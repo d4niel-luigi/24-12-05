@@ -26,35 +26,21 @@ export class GyerekController {
     return gyerek;
   }
   
-  @Put(':childId/toys/:toyId')
-  async addToyToChild(
-    @Param('childId') childId: string,
-    @Param('toyId') toyId: string,
-  ) {
-    const childIdNum = parseInt(childId, 10);
-    const toyIdNum = parseInt(toyId, 10);
-   
-    const response = await this.GyerekService.addToyToChild(childIdNum, toyIdNum);
-    if (!response) {
-      throw new NotFoundException(`Failed to add toy ID ${toyId} to child ID ${childId}`);
+  @Put(':gyerekId/jatek/:jatekId')
+  async addToyToChild(@Param('gyerekId') gyerekId: string, @Param('jatekId') jatekId: string) {
+    const result = await this.GyerekService.addToyToChild(+gyerekId, +jatekId);
+    if (!result) {
+      throw new NotFoundException('Nincs ilyen ID-val rendelkező gyerek vagy játék!');
     }
-    return response;
-   
-  
+    return result;
   }
-  @Delete(':childId/toys/:toyId')
-  async removeToyFromChild(
-    @Param('childId') childId: string,
-    @Param('toyId') toyId: string,
-  ) {
-    const childIdNum = parseInt(childId, 10);
-    const toyIdNum = parseInt(toyId, 10);
-   
-    const response = await this.GyerekService.removeToyFromChild(childIdNum, toyIdNum);
-    if (!response) {
-      throw new NotFoundException(`Failed to remove toy ID ${toyId} from child ID ${childId}`);
+  @Delete(':gyerekId/jatek/:jatekId')
+  async removeToyFromChild(@Param('gyerekId') gyerekId: string, @Param('jatekId') jatekId: string) {
+    const result = await this.GyerekService.removeToyFromChild(+gyerekId, +jatekId);
+    if (!result) {
+      throw new NotFoundException('Nincs ilyen ID-val rendelkező gyerek vagy játék!');
     }
-    return response;
+    return result;
   }
 
   @Delete(':id')
